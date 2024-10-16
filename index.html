@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertidor de números reales a representación IEEE 754</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div></div>
+    <form action="">
+        <p>Ingrese un número base 10:</p>
+        <input type="number" id="numb10" step="any">
+        <p>
+            Base de conversión 2
+        </p>
+
+        <input type="button" value="Enviar" onclick="convertir_10()">
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Signo</th>
+                <th>Exp</th>
+                <th>Decimal</th>
+            </tr>
+        </thead>
+        <tbody id="resultado"></tbody>
+    </table>
+
+    <script>
+        function convertir_10() {
+            let valor1 = parseFloat(document.getElementById("numb10").value);
+            if (isNaN(valor1)) {
+                document.getElementById("resultado").innerHTML = "<tr><td colspan='3'>Por favor ingrese un número válido.</td></tr>";
+                return;
+            }
+
+            let signo = valor1 >= 0 ? "0" : "1";
+            let entero = Math.abs(Math.trunc(valor1));
+            let decimal = Math.abs(valor1) - entero;
+
+            let respuesta = "";
+            while (entero > 0) {
+                let a = entero % 2;
+                respuesta = a.toString() + respuesta;
+                entero = Math.trunc(entero / 2);
+            }
+
+            let respuesta1 = "";
+            let binario = decimal;
+
+            for (let i = 0; i < 23; i++) {
+                binario = binario * 2;
+                let ent = Math.trunc(binario);
+                respuesta1 = respuesta1 + ent.toString();
+                binario = binario - ent;
+            }
+
+            respuesta = respuesta + "." + respuesta1;
+
+            let index = respuesta.indexOf('1');
+            let desplazamiento = 0;
+            while (index > 0) {
+                respuesta = respuesta.slice(0, index - 1) + '.' + respuesta.slice(index - 1).replace('.', '');
+                index--;
+            }
+            if (index === 0) {
+                respuesta = '1.' + respuesta.slice(1).replace('.', '');
+            }
+
+            let decimal1 = respuesta1.indexOf('.');
+            let decimal2 = respuesta.indexOf('.');
+
+            let decimal3 = decimal2 - decimal1 + 1;
+
+            let exp = 127 + decimal3;
+            respuesta1 = "";
+            while (exp > 0) {
+                let b = exp % 2;
+                respuesta1 = b.toString() + respuesta1;
+                exp = Math.trunc(exp / 2);
+            }
+            let puntoIndex = respuesta.indexOf('.');
+            if (puntoIndex !== -1) {
+                respuesta = respuesta.slice(puntoIndex + 1);
+            }
+
+            document.getElementById("resultado").innerHTML = `<tr>
+                <td>${signo}</td>
+                <td>${respuesta1}</td>
+                <td>${respuesta}</td>
+            </tr>`;
+        }
+    </script>
+</body>
+
+</html>
